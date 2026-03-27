@@ -592,7 +592,7 @@ sudo rtcwake -m no -t $(date -d "tomorrow 03:55" +%s)
 
 ```powershell
 # Пробуждение через Task Scheduler
-schtasks /create /tn "ExocortexWake" /tr "wsl ~/IWE/DS-IT-systems/DS-ai-systems/synchronizer/scripts/scheduler.sh dispatch" /sc daily /st 04:00
+schtasks /create /tn "ExocortexWake" /tr "wsl ~/IWE/scripts/scheduler.sh dispatch" /sc daily /st 04:00
 # Предотвращение сна: powercfg /change standby-timeout-ac 0
 ```
 

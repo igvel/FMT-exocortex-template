@@ -109,8 +109,8 @@
 
 ### Read-only репо
 
-> **DS-IT-systems/SystemsSchool_bot** — ⛔ READ-ONLY.
-> **DS-IT-systems/aisystant** — ⛔ READ-ONLY.
+<!-- Добавьте свои read-only репо. Пример: -->
+<!-- > **your-org/your-repo** — ⛔ READ-ONLY. -->
 
 ### README.md (FMT-exocortex-template)
 
