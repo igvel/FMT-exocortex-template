@@ -278,6 +278,13 @@ TIMEZONE_DESC=$TIMEZONE_DESC
 HOME_DIR=$HOME_DIR
 INSTALL_LEVEL=$INSTALL_LEVEL
 
+# === MCP (substituted into .mcp.json) ===
+# Platform MCP packages — update version here, run update.sh to apply
+KNOWLEDGE_MCP_PACKAGE=@aisystant/knowledge-mcp
+KNOWLEDGE_MCP_DATABASE_URL=
+DIGITAL_TWIN_MCP_PACKAGE=@aisystant/digital-twin-mcp
+DIGITAL_TWIN_DATABASE_URL=
+
 # === Knowledge Gateway (T3+, NOT substituted into files — read by Gateway scripts only) ===
 # ORY_TOKEN: platform authentication token. Rotate manually if expired. update.sh preserves this value.
 ORY_TOKEN=$ORY_TOKEN
@@ -460,6 +467,77 @@ else
     if [ -f "$TEMPLATE_DIR/.claude/settings.json" ]; then
         cp "$TEMPLATE_DIR/.claude/settings.json" "$WORKSPACE_DIR/.claude/settings.json"
         echo "  ✓ .claude/settings.json"
+    fi
+fi
+
+# === 4c. Generate .mcp.json in workspace ===
+echo "[4c] Configuring .mcp.json..."
+
+MCP_TEMPLATE="$TEMPLATE_DIR/.mcp.json"
+MCP_DEST="$WORKSPACE_DIR/.mcp.json"
+MCP_USER_EXT="$WORKSPACE_DIR/extensions/mcp-user.json"
+
+if $DRY_RUN; then
+    echo "  [DRY RUN] Would generate $MCP_DEST from $MCP_TEMPLATE"
+    echo "    Substituting: KNOWLEDGE_MCP_PACKAGE, KNOWLEDGE_MCP_DATABASE_URL,"
+    echo "                  DIGITAL_TWIN_MCP_PACKAGE, DIGITAL_TWIN_DATABASE_URL, GITHUB_USER"
+    if [ -f "$MCP_USER_EXT" ] && command -v jq >/dev/null 2>&1; then
+        echo "  [DRY RUN] Would merge extensions/mcp-user.json into .mcp.json"
+    fi
+elif [ ! -f "$MCP_TEMPLATE" ]; then
+    echo "  WARN: $MCP_TEMPLATE not found, skipping."
+else
+    # Read MCP variables from .exocortex.env (already saved above)
+    ENV_FILE="$TEMPLATE_DIR/.exocortex.env"
+    KNOWLEDGE_MCP_PACKAGE=""
+    KNOWLEDGE_MCP_DATABASE_URL=""
+    DIGITAL_TWIN_MCP_PACKAGE=""
+    DIGITAL_TWIN_DATABASE_URL=""
+    if [ -f "$ENV_FILE" ]; then
+        while IFS= read -r line; do
+            case "$line" in \#*|"") continue ;; esac
+            k="${line%%=*}"; v="${line#*=}"
+            k=$(echo "$k" | tr -d '[:space:]')
+            case "$k" in
+                KNOWLEDGE_MCP_PACKAGE)     KNOWLEDGE_MCP_PACKAGE="$v" ;;
+                KNOWLEDGE_MCP_DATABASE_URL) KNOWLEDGE_MCP_DATABASE_URL="$v" ;;
+                DIGITAL_TWIN_MCP_PACKAGE)  DIGITAL_TWIN_MCP_PACKAGE="$v" ;;
+                DIGITAL_TWIN_DATABASE_URL) DIGITAL_TWIN_DATABASE_URL="$v" ;;
+            esac
+        done < "$ENV_FILE"
+    fi
+
+    # Copy template .mcp.json to workspace
+    cp "$MCP_TEMPLATE" "$MCP_DEST"
+
+    # Substitute MCP-specific placeholders
+    sed_inplace \
+        -e "s|{{KNOWLEDGE_MCP_PACKAGE}}|${KNOWLEDGE_MCP_PACKAGE:-@aisystant/knowledge-mcp}|g" \
+        -e "s|{{KNOWLEDGE_MCP_DATABASE_URL}}|${KNOWLEDGE_MCP_DATABASE_URL:-}|g" \
+        -e "s|{{DIGITAL_TWIN_MCP_PACKAGE}}|${DIGITAL_TWIN_MCP_PACKAGE:-@aisystant/digital-twin-mcp}|g" \
+        -e "s|{{DIGITAL_TWIN_DATABASE_URL}}|${DIGITAL_TWIN_DATABASE_URL:-}|g" \
+        "$MCP_DEST"
+
+    echo "  Generated: $MCP_DEST"
+
+    # Merge extensions/mcp-user.json if it exists and has content
+    if [ -f "$MCP_USER_EXT" ]; then
+        if command -v jq >/dev/null 2>&1; then
+            # Check if mcp-user.json has any servers
+            USER_COUNT=$(jq '.mcpServers | length' "$MCP_USER_EXT" 2>/dev/null || echo "0")
+            if [ "$USER_COUNT" -gt 0 ]; then
+                MCP_MERGED=$(jq -s '.[0].mcpServers * .[1].mcpServers | {mcpServers: .}' "$MCP_DEST" "$MCP_USER_EXT" 2>/dev/null)
+                if [ -n "$MCP_MERGED" ]; then
+                    echo "$MCP_MERGED" > "$MCP_DEST"
+                    echo "  Merged $USER_COUNT server(s) from extensions/mcp-user.json"
+                fi
+            else
+                echo "  extensions/mcp-user.json is empty — skipping merge"
+            fi
+        else
+            echo "  ○ jq not found — extensions/mcp-user.json merge skipped"
+            echo "    Install jq: brew install jq"
+        fi
     fi
 fi
 
