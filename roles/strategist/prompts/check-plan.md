@@ -4,7 +4,7 @@
 
 ## Контекст
 
-- Планы: {{WORKSPACE_DIR}}/DS-strategy/current/
+- Планы: /home/igvel/repos/IWE/DS-strategy/current/
 
 ## Алгоритм
 
