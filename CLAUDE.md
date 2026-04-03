@@ -134,8 +134,8 @@
 ### Extensions Gate (БЛОКИРУЮЩЕЕ)
 
 **Кастомизация протоколов/скиллов → ТОЛЬКО в `extensions/*.md`.**
-Прямое редактирование `.claude/skills/` или `memory/protocol-*.md` = ошибка: сотрётся при `update.sh`.
-Авторское → `extensions/`. Платформенное → `FMT-exocortex-template`, затем `update.sh`.
+Прямое редактирование `.claude/skills/` или `memory/protocol-*.md` = ошибка.
+**Архитектурное обоснование:** платформенные файлы (L1) и пользовательские расширения (L3) -- разные слои. Смешение слоёв = хрупкость при обновлении (3-way merge не может отличить платформенное от пользовательского внутри одного файла). Разделение: платформенное → `FMT-exocortex-template` → `update.sh`. Пользовательское → `extensions/` + `params.yaml`.
 
 
 ### README.md (FMT-exocortex-template)
