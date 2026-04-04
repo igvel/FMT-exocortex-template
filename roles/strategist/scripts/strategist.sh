@@ -243,10 +243,11 @@ case "$1" in
 
         run_claude "note-review"
 
-        # Canary: non-blocking diagnostic (isolated from set -e to protect cleanup below)
+        # Canary: count bold notes after (needs to be visible for alert at line ~274)
+        BOLD_AFTER=$(grep -c '^\*\*' "$FLEETING" 2>/dev/null || echo 0)
+        BOLD_NEW_AFTER=$(grep -vc '🔄' <(grep '^\*\*' "$FLEETING" 2>/dev/null) 2>/dev/null || echo 0)
+        # Non-blocking diagnostic (isolated from set -e to protect cleanup below)
         (
-            BOLD_AFTER=$(grep -c '^\*\*' "$FLEETING" 2>/dev/null || echo 0)
-            BOLD_NEW_AFTER=$(grep -vc '🔄' <(grep '^\*\*' "$FLEETING" 2>/dev/null) 2>/dev/null || echo 0)
             log "Canary: $BOLD_AFTER bold total ($BOLD_NEW_AFTER new)"
             NON_BOLD=$(grep -c '^[^*#>-]' "$FLEETING" 2>/dev/null || echo 0)
             log "Non-bold content lines: $NON_BOLD"
