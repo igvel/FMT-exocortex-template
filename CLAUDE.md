@@ -128,8 +128,6 @@
 
 ### Read-only репо
 
-> **DS-IT-systems/SystemsSchool_bot** — ⛔ READ-ONLY.
-> **DS-IT-systems/aisystant** — ⛔ READ-ONLY.
 
 ### Extensions Gate (БЛОКИРУЮЩЕЕ)
 
