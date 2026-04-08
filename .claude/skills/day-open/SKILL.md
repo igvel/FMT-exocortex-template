@@ -84,7 +84,7 @@ for repo in FPF SPF ZP; do
   [ -d "$dir/.git" ] && (cd "$dir" && git fetch --quiet 2>/dev/null && behind=$(git rev-list --count HEAD..origin/main 2>/dev/null || echo 0) && [ "$behind" -gt 0 ] && echo "$repo: $behind новых коммитов" || echo "$repo: актуален")
 done
 ```
-Если есть новые коммиты → добавить в «Требует внимания»: «[repo] обновлён upstream → `cd {{HOME_DIR}}/IWE/[repo] && git pull --rebase`». После pull FPF/SPF → reindex: `bash {{HOME_DIR}}/IWE/DS-MCP/knowledge-mcp/scripts/selective-reindex.sh FPF` (или SPF).
+Если есть новые коммиты → добавить в «Требует внимания»: «[repo] обновлён upstream → `cd {{HOME_DIR}}/IWE/[repo] && git pull --rebase`». После pull FPF/SPF → reindex: `bash {{HOME_DIR}}/IWE/DS-MCP/knowledge-mcp/scripts/selective-reindex.sh FPF` (или SPF). Reindex обновит данные, доступные через Gateway (iwe-knowledge).
 
 ### 5a2. Видео
 Если `day-rhythm-config.yaml → video.enabled: true`:
