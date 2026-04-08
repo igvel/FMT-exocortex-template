@@ -17,6 +17,9 @@ Versioning: [Semantic Versioning](https://semver.org/).
 - **wp-gate-reminder.sh** — при Day Open инжектирует extension loading reminder
 - **settings.json** — добавлен PreToolUse Bash matcher для protocol-artifact-validate.sh
 
+### Fixed
+- **settings.json** — убрана лишняя строка `.claude/hooks` из `additionalDirectories` (вызывала открытие файлов хуков как вкладок в Cursor/VS Code на Windows)
+
 ## [0.22.0] — 2026-04-06
 
 ### Added
